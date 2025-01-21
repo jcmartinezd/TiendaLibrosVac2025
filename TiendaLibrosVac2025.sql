@@ -1,5 +1,5 @@
-create database TiendaLibros;
-use TiendaLibros;
+create database TiendaLibrosVac2025;
+use TiendaLibrosVac2025;
 
 -- Tabla para libros
 
@@ -23,7 +23,7 @@ create table TiposTransaccion (
 
 -- Insertar tipos de transacciones válidos
 
-ISERT INTO TiposTransaccion (id_tipo, nombre) VALUES 
+INSERT INTO TiposTransaccion (id_tipo, nombre) VALUES 
 (1, 'VENTA'),
 (2, 'ABASTECIMIENTO');
 
@@ -55,8 +55,7 @@ create table Caja (
 
 -- Ingresar el saldo inicial en la caja
 
-INSERT INTO Caja (tipo_movimiento, monto, saldo_actual) VALUES
-    ('INGRESO', 1000000.00, 1000000.00);
+INSERT INTO Caja (tipo_movimiento, monto, saldo_actual) VALUES ('INGRESO', 1000000.00, 1000000.00);
 
 -- Trigger para ventas: actualizar el inventario y la caja 
 
@@ -76,16 +75,40 @@ BEGIN
         FROM Libros
         WHERE ISBN = @ISBN;
 
-    -- Actualizar el inventario
-    UPDATE Libros
-    SET cantidad_actual = cantidad_actual - @cantidad
-    WHERE ISBN = @ISBN;
+		-- Actualizar el inventario
+		UPDATE Libros
+		SET cantidad_actual = cantidad_actual - @cantidad
+		WHERE ISBN = @ISBN;
 
-    -- Actualizar la caja
-    INSERT INTO Caja (tipo_movimiento, monto, saldo_actual, id_transaccion)    
+		-- Actualizar la caja
+		INSERT INTO Caja (tipo_movimiento, monto, saldo_actual, id_transaccion)    
 
-    SELECT 'INGRESO', @cantidad * @precio_venta
-    FROM inserted;
-    END;
-    
+		SELECT 'INGRESO', @cantidad * @precio_venta
+		FROM inserted;
+    END; 
+END;
+
+-- Trigger para el abastecimiento de libros: actualizar inventario, restar dinero a la caja
+
+CREATE TRIGGER trg_Abastecimiento_Transaccion
+ON Transacciones
+AFTER INSERT
+AS
+BEGIN
+	DECLARE @ISBN VARCHAR(13), @tipo_transaccion INT, @cantidad INT, @precio_compra DECIMAL(10,2);
+
+	IF @tipo_transaccion = 2
+	BEGIN
+		SELECT @precio_compra = precio_compra FROM Libros WHERE ISBN = @ISBN;
+
+		-- Actualizar el inventario
+		UPDATE Libros
+		SET cantidad_actual = cantidad_actual + @cantidad
+		WHERE ISBN = @ISBN;
+
+		-- Registrar egreso en la caja
+		INSERT INTO Caja (tipo_movimiento, monto, saldo_actual, id_transaccion)
+		SELECT 'EGRESO', @cantidad * @precio_compra
+		FROM inserted;
+	END
 END;
