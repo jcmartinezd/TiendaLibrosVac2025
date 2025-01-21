@@ -84,7 +84,9 @@ BEGIN
 		-- Actualizar la caja
 		INSERT INTO Caja (tipo_movimiento, monto, saldo_actual, id_transaccion)    
 
-		SELECT 'INGRESO', @cantidad * @precio_venta
+		SELECT 'INGRESO', @cantidad * @precio_venta,
+            (SELECT TOP 1 saldo_actual FROM Caja ORDER BY id_movimiento DESC)+ (@cantidad* @precio_venta),
+            inserted.id_transaccion
 		FROM inserted;
     END; 
 END;
@@ -110,7 +112,10 @@ BEGIN
 
 		-- Registrar egreso en la caja
 		INSERT INTO Caja (tipo_movimiento, monto, saldo_actual, id_transaccion)
-		SELECT 'EGRESO', @cantidad * @precio_compra
+
+		SELECT 'EGRESO', @cantidad * @precio_compra, 
+            (SELECT TOP 1 saldo_actual FROM Caja ORDER BY id_movimiento DESC) - (@cantidad * @precio_compra),
+            inserted.id_transaccion
 		FROM inserted;
 	END
 END;
