@@ -56,6 +56,7 @@ create table Caja (
 -- Ingresar el saldo inicial en la caja
 
 INSERT INTO Caja (tipo_movimiento, monto, saldo_actual) VALUES ('INGRESO', 1000000.00, 1000000.00);
+GO
 
 -- Trigger para ventas: actualizar el inventario y la caja 
 
@@ -88,6 +89,7 @@ BEGIN
     END; 
 END;
 
+GO
 -- Trigger para el abastecimiento de libros: actualizar inventario, restar dinero a la caja
 
 CREATE TRIGGER trg_Abastecimiento_Transaccion
