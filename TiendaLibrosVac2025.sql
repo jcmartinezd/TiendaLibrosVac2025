@@ -119,3 +119,71 @@ BEGIN
 		FROM inserted;
 	END
 END;
+
+-- 1. Registrar un libro en el catalogo 
+
+INSERT INTO Libros (ISBN, titulo, precio_compra, precio_venta, cantidad_actual) 
+VALUES ('9788437604947', 'El Quijote', 10.00, 20.00, 100),
+('9788498387087', 'Cien años de soledad', 25000.00, 45000.00, 10),
+('9788420471839', '1984', 20000.00, 35000.00, 15),
+('9788420412146', 'El Señor de los Anillos', 35000.00, 65000.00, 8),
+('9788466337991', 'El Còdigo Da Vinci', 22000.00, 40000.00, 12);
+
+-- Insertar transacciones de prueba
+INSERT INTO Transacciones (ISBN, tipo_transaccion, cantidad) VALUES
+('9788498387087', 1, 3),
+('9788420471839', 2, 5); 
+
+-- 2. Eliminar un libro del catálogo.
+
+DELETE FROM Libros WHERE ISBN = '9788437604947';
+SELECT * FROM Libros WHERE ISBN = '9788437604947';
+
+-- 3. Buscar un libro por título.
+
+SELECT * FROM Libros WHERE titulo= '1984';
+
+-- 4. Buscar un libro por ISBN.
+
+SELECT * FROM Libros WHERE ISBN = '9788466337991';
+
+-- 5. Abastecer ejemplares de un libro.
+
+INSERT INTO Libros (ISBN, titulo, precio_compra, precio_venta, cantidad_actual) 
+VALUES ('9788437604947', 'El Quijote', 10.00, 20.00, 100);
+
+-- 6. Vender ejemplares de un libro.
+
+INSERT INTO Transacciones (ISBN, tipo_transaccion, cantidad) VALUES ('9788420412146', 1, 2);
+SELECT * FROM Libros;
+SELECT * FROM Caja ORDER BY id_movimiento DESC;
+
+
+-- 7. Calcular la cantidad de transacciones de abastecimiento de un libro particular.
+
+DECLARE @ISBN VARCHAR(13) = '9788420471839';
+SELECT COUNT(*) FROM Transacciones WHERE ISBN = @ISBN AND tipo_transaccion = 2;
+
+
+-- 8. Buscar el libro más costoso.
+
+SELECT * FROM Libros WHERE precio_venta = (SELECT MAX(precio_venta) FROM Libros);
+
+-- SELECT TOP 1 ISBN, titulo, precio_venta FROM Libros ORDER BY precio_venta DESC;
+
+-- 9. Buscar el libro menos costoso.
+
+SELECT MIN(precio_venta),libros, titulo, precio_venta
+FROM Libros;
+
+SELECT TOP 1 ISBN, titulo, precio_venta FROM Libros ORDER BY precio_venta ASC;
+
+-- 10. Buscar el libro más vendido.
+
+SELECT TOP 1 Libros.ISBN, Libros.titulo, SUM(Transacciones.cantidad) as CantidadVendida
+FROM Transacciones 
+JOIN Libros ON Transacciones.ISBN = Libros.ISBN
+WHERE tipo_transaccion = 1
+GROUP BY Libros.ISBN, Libros.titulo
+ORDER BY CantidadVendida DESC;
+
