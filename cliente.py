@@ -14,3 +14,19 @@ def obtener_libros():
     except requests.exceptions.RequestException as e:
         print (f"Error al obtener Libros: {e}")
         return[]
+    
+#Funcion para agregar libros
+def agregar_libro(ISBN, titulo, precio_compra, precio_venta, cantidad_actual):
+    data = {
+        "ISBN": ISBN,
+        "titulo": titulo,
+        "precio_compra": precio_compra,
+        "precio_venta": precio_venta,
+        "cantidad_actual": cantidad_actual
+    }
+    try:
+        response = requests.post('http://localhost:5000/Libros', json=data, auth=auth)
+        response.raise_for_status()
+        print("Libro agregado correctamente")
+    except requests.exceptions.RequestException as e:
+        print(f"Error al agregar Libro: {e}")

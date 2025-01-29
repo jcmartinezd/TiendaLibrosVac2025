@@ -64,3 +64,8 @@ def agregar_libro():
     finally:
         conn.close()
 
+if __name__ == '__main__':
+    app.run(port=5000)
+
+
+
